@@ -6982,6 +6982,7 @@ activate_stage1_device_prepare (NMDevice *self)
 	NMActStageReturn ret = NM_ACT_STAGE_RETURN_SUCCESS;
 	NMActiveConnection *active;
 	NMActiveConnection *master;
+	NMDeviceClass *klass;
 
 	priv->v4_route_table_initialized = FALSE;
 	priv->v6_route_table_initialized = FALSE;
@@ -7055,8 +7056,9 @@ activate_stage1_device_prepare (NMDevice *self)
 	}
 
 	/* Assumed connections were already set up outside NetworkManager */
-	if (!nm_device_sys_iface_state_is_external_or_assume (self)) {
-		NMDeviceClass *klass = NM_DEVICE_GET_CLASS (self);
+	klass = NM_DEVICE_GET_CLASS (self);
+	if (   klass->act_stage1_prepare_also_for_external_or_assume
+	    || !nm_device_sys_iface_state_is_external_or_assume (self)) {
 
 		if (klass->act_stage1_prepare_set_hwaddr_ethernet) {
 			if (!nm_device_hw_addr_set_cloned (self,
